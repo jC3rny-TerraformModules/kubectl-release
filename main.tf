@@ -50,7 +50,7 @@ resource "kubectl_manifest" "helm_template" {
 data "jsonnet_file" "release" {
   count = var.jsonnet_folder_path != "" ? 1 : 0
   #
-  source   = var.jsonnet_file_path != "" ? var.jsonnet_file_path : local.jsonnet_file_path
+  source = var.jsonnet_file_path != "" ? var.jsonnet_file_path : local.jsonnet_file_path
 }
 
 data "kubectl_file_documents" "jsonnet_file" {
