@@ -1,2 +1,2 @@
 # kubectl-release
-Terraform module that manages Kubernetes resources via kubectl
+Terraform module that converts various sources into raw yaml and manages them via kubectl.
