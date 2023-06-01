@@ -1,7 +1,8 @@
 
 locals {
-  jsonnet_libs_path = "${var.jsonnet_folder_path}/vendor"
-  jsonnet_file_path = "${var.jsonnet_folder_path}/${var.jsonnet_environment_folder_name}/${var.jsonnet_environment_subfolder_name}/_main.jsonnet"
+  jsonnet_libs_path      = "${var.jsonnet_folder_path}/vendor"
+  jsonnet_file_directory = "${var.jsonnet_folder_path}/${var.jsonnet_environment_folder_name}/${var.jsonnet_environment_subfolder_name}"
+  jsonnet_files          = fileset(local.jsonnet_file_directory, "*.jsonnet")
   #
   kubectl_config_path = "./tmp/kube.config"
   #
@@ -48,13 +49,13 @@ resource "kubectl_manifest" "helm_template" {
 
 # jsonnet
 data "jsonnet_file" "release" {
-  count = var.jsonnet_folder_path != "" ? 1 : 0
+  for_each = { for f in local.jsonnet_files : f => f if var.jsonnet_folder_path != "" }
   #
-  source = var.jsonnet_file_path != "" ? var.jsonnet_file_path : local.jsonnet_file_path
+  source = var.jsonnet_file_path != "" ? var.jsonnet_file_path : "${local.jsonnet_file_directory}/${each.value}"
 }
 
 data "kubectl_file_documents" "jsonnet_file" {
-  for_each = { for k, v in try(jsondecode(data.jsonnet_file.release[0].rendered), []) : k => v }
+  for_each = { for k, v in flatten([ for obj in data.jsonnet_file.release : jsondecode(obj.rendered) ]) : k => v }
   #
   content = yamlencode(each.value)
   #
