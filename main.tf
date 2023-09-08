@@ -4,12 +4,14 @@ locals {
   jsonnet_file_directory = "${var.jsonnet_folder_path}/${var.jsonnet_environment_folder_name}/${var.jsonnet_environment_subfolder_name}"
   jsonnet_files          = fileset(local.jsonnet_file_directory, "*.jsonnet")
   #
-  kubectl_config_path = "./tmp/kube.config"
-  #
   kubectl_manifest_sensitive_fields = var.kubectl_manifest_sensitive_fields != null ? concat(["data"], var.kubectl_manifest_sensitive_fields) : null
 }
 
-# helm_chart
+
+# kubernetes server version
+data "kubectl_server_version" "current" {}
+
+# helm
 data "helm_template" "release" {
   count = var.helm_chart_path != "" ? 1 : 0
   #
@@ -18,7 +20,13 @@ data "helm_template" "release" {
   name      = var.helm_release_name
   namespace = var.helm_release_namespace
   #
+  kube_version = data.kubectl_server_version.current.version
+  #
   values = var.helm_chart_values
+  #
+  depends_on = [
+    data.kubectl_server_version.current
+  ]
 }
 
 data "kubectl_file_documents" "helm_template" {
@@ -55,7 +63,7 @@ data "jsonnet_file" "release" {
 }
 
 data "kubectl_file_documents" "jsonnet_file" {
-  for_each = { for k, v in flatten([ for obj in data.jsonnet_file.release : jsondecode(obj.rendered) ]) : k => v }
+  for_each = { for k, v in flatten([for obj in data.jsonnet_file.release : jsondecode(obj.rendered)]) : k => v }
   #
   content = yamlencode(each.value)
   #

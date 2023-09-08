@@ -1,3 +1,10 @@
+
+# kubernetes
+variable "kubernetes_config_path" {
+  type    = string
+  default = ""
+}
+
 # helm_chart
 variable "helm_chart_path" {
   type    = string
@@ -37,12 +44,6 @@ variable "jsonnet_environment_folder_name" {
 }
 
 variable "jsonnet_environment_subfolder_name" {
-  type    = string
-  default = ""
-}
-
-# kubectl
-variable "kubectl_config_path" {
   type    = string
   default = ""
 }

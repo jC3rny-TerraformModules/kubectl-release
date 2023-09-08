@@ -4,11 +4,11 @@ output "helm_template_manifests" {
 }
 
 output "jsonnet_files" {
-  value = var.jsonnet_folder_path != "" ? [ for f in local.jsonnet_files : f ] : null
+  value = var.jsonnet_folder_path != "" ? [for f in local.jsonnet_files : f] : null
 }
 
 output "jsonnet_file_release" {
-  value = var.jsonnet_folder_path != "" ? flatten([ for obj in data.jsonnet_file.release : jsondecode(obj.rendered) ]) : null
+  value = var.jsonnet_folder_path != "" ? flatten([for obj in data.jsonnet_file.release : jsondecode(obj.rendered)]) : null
 }
 
 output "jsonnet_file_documents" {
